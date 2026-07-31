@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSP Quick Reference Guide</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: rgba(37, 99, 235, 0.15);
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            
+            /* Sidebar Styling Variables */
+            --nav-bg: #0f172a;
+            --nav-surface: #1e293b;
+            --nav-text: #94a3b8;
+            --nav-text-active: #ffffff;
+            --nav-hover-bg: #1e293b;
+            --active-accent: #38bdf8;
+            --sidebar-width: 280px;
+            --trigger-zone-width: 16px; /* Visible edge area to trigger hover */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Hover-Trigger Container --- */
+        #sidebar-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--trigger-zone-width);
+            z-index: 1000;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Visual indicator tab on the edge when collapsed */
+        #sidebar-wrapper::after {
+            content: "▶";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 4px;
+            font-size: 0.65rem;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            opacity: 0.85;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        #sidebar-wrapper:hover::after {
+            opacity: 0;
+        }
+
+        /* Expand hover area when active */
+        #sidebar-wrapper:hover {
+            width: var(--sidebar-width);
+        }
+
+        /* --- Modern Sidebar Design (Hidden Off-Screen) --- */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--nav-bg);
+            color: var(--nav-text);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1e293b;
+            box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Slide Out on Hover */
+        #sidebar-wrapper:hover #sidebar {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-logo svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .brand-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .nav-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 16px 12px;
+        }
+
+        .nav-section-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            font-weight: 700;
+            padding: 12px 12px 6px 12px;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+            user-select: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            color: var(--nav-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .nav-link:hover {
+            background-color: var(--nav-hover-bg);
+            color: #f1f5f9;
+        }
+
+        .nav-link:hover .nav-icon {
+            opacity: 1;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(37, 99, 235, 0.1));
+            color: var(--active-accent);
+            font-weight: 600;
+        }
+
+        .nav-link.active .nav-icon {
+            stroke: var(--active-accent);
+            opacity: 1;
+        }
+
+        /* Submenu Styling */
+        .submenu {
+            list-style: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            padding-left: 12px;
+            margin-top: 2px;
+            position: relative;
+        }
+
+        .submenu::before {
+            content: "";
+            position: absolute;
+            left: 23px;
+            top: 0;
+            bottom: 8px;
+            width: 1px;
+            background-color: #334155;
+        }
+
+        .submenu.open {
+            max-height: 500px;
+        }
+
+        .submenu .nav-link {
+            padding: 8px 12px 8px 24px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .chevron {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .chevron.rotated {
+            transform: rotate(90deg);
+        }
+
+        /* --- Main Content Area (Adjusted for Hover Sidebar) --- */
+        #main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px 40px 40px calc(var(--trigger-zone-width) + 30px);
+            transition: padding-left 0.3s ease;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            color: #0f172a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin: 25px 0 12px 0;
+        }
+
+        /* Tables & Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #62607e;
+            color: #d5dce4;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #accae9;
+        }
+
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 0.9rem;
+            color: #1e40af;
+            border-radius: 0 4px 4px 0;
+            white-space: pre-line;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hover-Triggered Redesigned Navigation Sidebar -->
+    <div id="sidebar-wrapper">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div>
+                    <div class="brand-title">GSP Reference</div>
+                    <div class="brand-subtitle">Quick Access Portal</div>
+                </div>
+            </div>
+
+            <ul class="nav-list">
+                <div class="nav-section-label">Main Navigation</div>
+
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showTab('gsp-brands', this)">
+                        <div class="nav-link-content">
+                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                            <span>1. GSP Brands Guide</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showTab('to-hotlines', this)">
+                        <div class="nav-link-content">
+                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <span>2. TO Hotlines Catalog</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleSubmenu(this)">
+                        <div class="nav-link-content">
+                            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            <span>3. Partner Details</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                    <ul class="submenu">
+                        <li><a class="nav-link" onclick="showTab('partner-att', this)">3.1 AT&T</a></li>
+                        <li><a class="nav-link" onclick="showTab('partner-telus', this)">3.2 Telus</a></li>
+                        <li><a class="nav-link" onclick="showTab('partner-frontier', this)">3.3 Frontier</a></li>
+                        <li><a class="nav-link" onclick="showTab('partner-brightspeed', this)">3.4 Brightspeed</a></li>
+                        <li><a class="nav-link" onclick="showTab('partner-cox', this)">3.5 Cox</a></li>
+                        <li><a class="nav-link" onclick="showTab('partner-zayo', this)">3.6 Zayo</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content">
+
+        <!-- 1. GSP BRANDS GUIDE -->
+        <section id="gsp-brands" class="content-section active">
+            <h1>1. GSP Brands Guide</h1>
+
+            <div class="card">
+                <h2>Brands Comparison Matrix</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature / Detail</th>
+                                <th>AT&T Office @ Hand</th>
+                                <th>Telus Business Connect</th>
+                                <th>Frontier With RingCentral</th>
+                                <th>BrightSpeed Voice+</th>
+                                <th>COX Business Connect</th>
+                                <th>Zayo UC+</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Onboarding Hotline</strong></td>
+                                <td>REX : 866 231 9926<br>
+                                    AT&T AIR : 1 844 205 7137<br>
+                                    AT&T ACE : 1 855 230 8394<br><br>
+                                    <small>Mon-Fri 8:00AM - 5:00PM Pacific</small></td>
+                                <td>
+                                    English: 800 426 8094<br>
+                                    French: 855 925 6112<br><br>
+                                    <small>Mon-Fri 6:00AM - 5:00PM Pacific</small>
+                                </td>
+                                <td>833 490 0151<br><br><small>Mon-Fri 8:00AM - 6:00PM Central</small></td>
+                                <td>844 426 6748<br><br><small>Mon-Fri 8:00AM - 5:00PM Eastern</small></td>
+                                <td>833 372 6621<br><br><small>Mon-Fri 8:00AM - 8:00PM Eastern</small></td>
+                                <td>833 366 2460<br><br><small>Mon-Fri 8:00AM - 5:00PM Mountain</small></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support / Tier 1</strong></td>
+                                <td>
+                                    800 615 0708 (Select 1 for O@H)<br>
+                                    1 - Mobility | 2 - Tech | 3 - Porting<br>
+                                    4 - Adds/Cancel/Business Center Access | 5 - Payments | 6 - Billing
+                                </td>
+                                <td>
+                                    1 844 626 6638<br>
+                                    (1 for English, 2 for French)<br>
+                                    1 - Sales | 2 - Billing | 3 - Tech Support
+                                </td>
+                                <td>
+                                    1. Frontier Tech Support: 833 767 8862<br>
+                                    2. MACD Hotline: 800 921 8102
+                                </td>
+                                <td>
+                                    1. Tech Support: 833 363 2313 (24/7)<br>
+                                    2. Cust Service / Sales: 833 692 7773<br>
+                                    3. Fiber Dept: 833 363 2432<br>
+                                    4.  Brightspeed Coordinator (For any non-technical concerns such as MACD request, ordering,<br>
+                                    Account manager unresponsive etc,)- Voice+ Project Coordinators : <strong style="color: red;">voipccms@brightspeed.com</strong>
+                                </td>
+                                <td>
+                                    844 303 2928<br>
+                                    Sales: 866 456 9944
+                                </td>
+                                <td>Tech Support: 888 985 8010</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DL's Covered</strong></td>
+                                <td>0 - 99 Seats</td>
+                                <td>0 - 99 Seats</td>
+                                <td>0 - 99 Seats</td>
+                                <td>0 - 2 Seats</td>
+                                <td>0 - 99 Seats</td>
+                                <td>0 - 99 Seats</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Warranty Period</strong></td>
+                                <td>30 Days from IMP Completion</td>
+                                <td>45 Days from Sign-up Date</td>
+                                <td>30 Days from IMP Completion</td>
+                                <td>30 Days from IMP Completion</td>
+                                <td>30 Days from IMP Completion</td>
+                                <td>30 Days from IMP Completion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Porting Timeframe</strong></td>
+                                <td>5 - 15 Business Days</td>
+                                <td>5 - 15 Business Days</td>
+                                <td>5 - 15 Business Days</td>
+                                <td>5 - 15 Business Days</td>
+                                <td>5 - 15 Business Days</td>
+                                <td>Porting done by Zayo PM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>SMB Range</strong></td>
+                                <td>0 - 5 DL</td>
+                                <td>N/A</td>
+                                <td>0 - 5 DL</td>
+                                <td>0 - 2 DL</td>
+                                <td>0 - 5 DL</td>
+                                <td>N/A</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Brightspeed Onboarding Exception Note</h2>
+                <div class="info-box">
+                    <strong>NOTE:</strong> 3+ seats are being onboarded by Brightspeed. If a customer has 3+ seats, please DO NOT ONBOARD as they are being onboarded by Brightspeed TDE team.
+                    <br>Email: <strong>Brightspeed-Onboarding@brightspeed.com</strong>
+                    <br>A Brightspeed Technical Design Engineer (TDE) will assist with setup, configuration, and admin training.
+                    <br>If callers need immediate technical assistance, Brightspeed’s 24x7 support team is available at <strong>833 363 2313</strong>.
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Unique Processes</h2>
+                <h3>Brightspeed Rules:</h3>
+                <ol>
+                    <li>Always check SCP for notes if the account is for Brightspeed TDE onboarding (3+ DLs). If so, DO NOT ONBOARD.</li>
+                    <li>If the caller's account total seats is 3+ but was previously 0-2, onboard the customer.</li>
+                    <li>Put the start and end of warranty period in USER notes in SCP after completion and CCNR (Audited).</li>
+                </ol>
+                <div class="info-box">
+                    <strong>Warranty USER Notes Template:</strong><br>
+                    Start of Warranty:<br>
+                    End of Warranty:
+                </div>
+
+                <h3>Zayo Distro Lists (Copy on communications):</h3>
+                <ul>
+                    <li><strong>RingCentralOrders@zayo.com</strong> - Day to day communications with the customer (Follow up email/Dialer etc.)</li>
+                    <li><strong>RingCentralCompletions@zayo.com</strong> - Completion / Thank you email.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Account Validation Matrix</h2>
+                <div class="table-responsive">
+                    <table>
+                        <p><strong>Note : </strong><i>The following validation requirements must only be done
+                        if standard and primary method of validation using SCP has been tried.</i></p><br><br>
+                        <thead>
+                            
+                            <tr>
+                                <th>Brand</th>
+                                <th>Validation Requirements</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>AT&T Office At Hand</strong></td>
+                                <td>
+                                    Follow Validation Process. Second Level Validation (At least 3):<br>
+                                    1. Sub Account Number (SA Node) for UB, CTN for Telegence<br>
+                                    2. Company Name | 3. Address on file (SCP/SF)<br>
+                                    4. Contact Number in SCP | 5. MAC Address | 6. Email address
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Telus Business Connect</strong></td>
+                                <td>
+                                    Follow Validation Process. Second Level Validation (At least 3):<br>
+                                    1. Registered Email | 2. Company Name | 3. Registered Phone No.<br>
+                                    4. Business Address | 5. BAN
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontier With RingCentral</strong></td>
+                                <td>
+                                    Follow Validation Process. Second Level Validation (At least 1):<br>
+                                    1. Email address on file | 2. Company Name | 3. MAC Address<br>
+                                    4. Address on file | 5. Contact Number in SCP
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Brightspeed / Cox / Zayo</strong></td>
+                                <td>
+                                    Follow Validation Process. Second Level Validation (RISE Americas - At least 3):<br>
+                                    1. Email address on file | 2. Company Name | 3. MAC Address<br>
+                                    4. Address on file | 5. Contact Number in SCP
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>International & Other Brands</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Brand / Region</th>
+                                <th>Contact Information</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>BT Cloudwork</strong></td><td>442030483832</td></tr>
+                            <tr><td><strong>RingCentral UK</strong></td><td>Tech. Onboarding: 08000487185 | AIR: +44 808 1962164</td></tr>
+                            <tr><td><strong>Versatel</strong></td><td>+498000010739</td></tr>
+                            <tr><td><strong>Vodafone (Germany)</strong></td><td>011498000010737</td></tr>
+                            <tr><td><strong>RingCentral Germany / The Company</strong></td><td>+498000001787</td></tr>
+                            <tr><td><strong>Vodafone (Ireland)</strong></td><td>+3531800816004</td></tr>
+                            <tr><td><strong>RingCentral EU</strong></td><td>France: 0 800 914 944 | Belgium: +3280054328 | Germany: +418000010738 | Switzerland: +41800562532</td></tr>
+                            <tr><td><strong>Optus</strong></td><td>611800960514</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TO HOTLINES CATALOG -->
+        <section id="to-hotlines" class="content-section">
+            <h1>2. TO Hotlines Catalog</h1>
+            <p style="margin-bottom: 20px; color: #64748b;">Overview of essential hotlines, portals, and contact info across all key partner brands.</p>
+
+            <div class="card">
+                <h2>Quick Partner Hotlines Summary</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Main Hotline / Tech Support</th>
+                                <th>Key Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>AT&T</strong></td>
+                                <td>(800) 615-0708 (Opt 1 for O@H)</td>
+                                <td>partners-implementation@ringcentral.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Telus</strong></td>
+                                <td>1 844 626 6638 / 844 549 3099</td>
+                                <td>bconn.concierge@telus.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontier</strong></td>
+                                <td>(833) 767-8862 opt 2</td>
+                                <td>Frontier-RingCentral@FTR.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Brightspeed</strong></td>
+                                <td>833-363-2313 (24/7 Tech)</td>
+                                <td>voipccms@brightspeed.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cox</strong></td>
+                                <td>833-372-6621 (Onboarding) / 844-303-2928</td>
+                                <td>Cox.Onboarding@ringcentral.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Zayo</strong></td>
+                                <td>888-985-8010</td>
+                                <td>RingCentralOrders@zayo.com</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.1 AT&T -->
+        <section id="partner-att" class="content-section">
+            <h1>3.1 Partner Details: AT&T</h1>
+
+            <div class="card">
+                <h2>Links & Portals</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FEDRAMP OKTA</strong></td>
+                                <td><a href="https://ringcentral.okta.com" target="_blank">https://ringcentral.okta.com</a></td>
+                                <td>Use AT&T domain credentials (e.g. username- marife.a.teano). Used to access Office@Hand web outlook.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>RingCentral BIZ.OKTA</strong></td>
+                                <td><a href="https://ringcentralbiz.okta.com/" target="_blank">https://ringcentralbiz.okta.com/</a></td>
+                                <td>Use RC Biz domain credentials. Access SCP.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>User Guide Links</strong></td>
+                                <td><a href="https://asecare.att.com/tutorials/att-officehand-user-guides-complete-list/?product=AT&T%20Office@Hand" target="_blank">Complete User Guides</a></td>
+                                <td>Complete list of user guides for AT&T Office@Hand.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Video Tutorials</strong></td>
+                                <td><a href="https://partnersupport.ringcentral.com/officeathand-att/get-started/app.html" target="_blank">Get Started Videos</a></td>
+                                <td>Video tutorials on how to use features.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Portal Login Page</strong></td>
+                                <td><a href="https://service-officeathand.att.com/" target="_blank">service-officeathand.att.com</a></td>
+                                <td>Customer portal login page.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Technical Onboarding Email</strong></td>
+                                <td>partners-implementation@ringcentral.com</td>
+                                <td>Where sellers/AMs request pre-implementation requests.</td>
+                            </tr>
+                             <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://meetings.officeathand.att.com/welcome/join/ " target="_blank">https://meetings.officeathand.att.com/welcome/join/ </a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Departments & Phone Numbers</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Phone Number</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Advanced Solutions Care</strong></td>
+                                <td>(800) 615-0708</td>
+                                <td>Opt 1 for O@H: 1-Mobility, 2-Tech, 3-Porting, 4-Adds/Cancel, 5-Payments, 6-Billing</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support APBA</strong></td>
+                                <td>800-615-0708 option 2</td>
+                                <td>Advance Phone Business Account</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AT&T Sales</strong></td>
+                                <td>855-866-4288</td>
+                                <td>M - F 7am - 7pm CT</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AT&T Fiber Support</strong></td>
+                                <td>800-288-2020</td>
+                                <td>General Fiber Hotline</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tech Support Business Fiber</strong></td>
+                                <td>800-321-2000</td>
+                                <td>Business Fiber Support</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Regional Sales & CSM Matrix</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Region</th>
+                                <th>Channel Sales Manager</th>
+                                <th>Customer Success Manager</th>
+                                <th>CSM Email</th>
+                                <th>States</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2"><strong>WEST</strong></td>
+                                <td rowspan="2">Michael Chapman<br><small>michael.chapman@ringcentral.com</small></td>
+                                <td>Margarita Angela 'Maan' Balon</td>
+                                <td>maan.balon@ringcentral.com</td>
+                                <td>CA (90-92), AZ, NM, NV</td>
+                            </tr>
+                            <tr>
+                                <td>Adrian Lopez</td>
+                                <td>adrian.lopez@ringcentral.com</td>
+                                <td>CA (93-99), AK, CO, HI, ID, MT, OR, UT, WA, WY</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2"><strong>SOUTH CENTRAL</strong></td>
+                                <td rowspan="2">Brian Winter<br><small>brian.winter@ringcentral.com</small></td>
+                                <td>Bernadette 'Bea' David</td>
+                                <td>bernadette.david@ringcentral.com</td>
+                                <td>TX (72-76), AR, LA</td>
+                            </tr>
+                            <tr>
+                                <td>Connie Angeles</td>
+                                <td>connie.angeles@ringcentral.com</td>
+                                <td>TX (77-88), KS, OK</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2"><strong>NORTH CENTRAL</strong></td>
+                                <td rowspan="2">Chris Anzalone<br><small>christopher.anzalone@ringcentral.com</small></td>
+                                <td>Shaila Mae Caber</td>
+                                <td>shaila.caber@ringcentral.com</td>
+                                <td>IA, IL, IN, MN, MO, ND, NE, SD, WI</td>
+                            </tr>
+                            <tr>
+                                <td>Ivy Penaloza</td>
+                                <td>ivy.penaloza@ringcentral.com</td>
+                                <td>CT, DC, DE, KY, MA, MD, ME, MI, NH, NJ, NY, OH, PA, RI, VT, WV</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2"><strong>SOUTH EAST</strong></td>
+                                <td rowspan="2">Ryan Hilscher<br><small>ryan.hilscher@ringcentral.com</small></td>
+                                <td>Joshua Emborong</td>
+                                <td>joshua.emborong@ringcentral.com</td>
+                                <td>AL, GA, MS, SC, TN</td>
+                            </tr>
+                            <tr>
+                                <td>Norman Gayola</td>
+                                <td>norman.gayola@ringcentral.com</td>
+                                <td>FL, NC, VA</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.2 TELUS -->
+        <section id="partner-telus" class="content-section">
+            <h1>3.2 Partner Details: Telus</h1>
+
+            <div class="card">
+                <h2>Links & Addresses</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>TELUS Okta</strong></td>
+                                <td><a href="https://ringcentral.okta.com" target="_blank">https://ringcentral.okta.com</a></td>
+                                <td>Use TELUS domain credentials.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Concierge Email (English)</strong></td>
+                                <td>bconn.concierge@telus.com</td>
+                                <td>Account-related issues outside onboarding scope.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Concierge Email (French)</strong></td>
+                                <td>bconcoe@telus.com</td>
+                                <td>French customer support outside onboarding scope.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TELUS Porting Team</strong></td>
+                                <td>businessconnectporting@telus.com</td>
+                                <td>Porting phone numbers queries.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Admin Portal</strong></td>
+                                <td><a href="https://voicemanager.businessconnect.telus.com" target="_blank">voicemanager.businessconnect.telus.com</a></td>
+                                <td>Customer portal access.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TELUS App</strong></td>
+                                <td><a href="https://app.businessconnect.telus.com" target="_blank">app.businessconnect.telus.com</a></td>
+                                <td>Download application for desktop.</td>
+                            </tr>
+                             <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://video.businessconnect.telus.com/welcome/join// " target="_blank">https://video.businessconnect.telus.com/welcome/join/ </a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Departments & Phone Numbers</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Phone Numbers</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>TELUS Business Wireline</strong></td>
+                                <td>
+                                    800 361 3311 (AB & BC)<br>
+                                    877 710 0404 (ON, SK, MB, NS, NB, NL, PE)<br>
+                                    877 520 1212 (QC - French)
+                                </td>
+                                <td>Account & Billing: Mon-Fri 8AM-5PM Local. Tech Support 24/7.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TELUS Mobility</strong></td>
+                                <td>866 558 2273 / *611</td>
+                                <td>Open 24/7</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TELUS Business Concierge</strong></td>
+                                <td>
+                                    844 549 3099 (INTERNAL ONLY)<br>
+                                    647 360 8003 (EN) / 403 345 7310 (FR)
+                                </td>
+                                <td>Mon-Fri, 8AM-5PM PST</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.3 FRONTIER -->
+        <section id="partner-frontier" class="content-section">
+            <h1>3.3 Partner Details: Frontier</h1>
+
+            <div class="card">
+                <h2>Links & Portals</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Get Started Videos</strong></td>
+                                <td><a href="https://partnersupport.ringcentral.com/frontier.html" target="_blank">Frontier Video Tutorials</a></td>
+                                <td>Video guides for feature usage.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Portal Log-in Page</strong></td>
+                                <td><a href="https://service.frontier.ringcentral.com" target="_blank">service.frontier.ringcentral.com</a></td>
+                                <td>Customer portal login page.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontier Customer Support Email</strong></td>
+                                <td>Frontier-RingCentral@FTR.com</td>
+                                <td>Order numbers for customer.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontier Tech Support Email</strong></td>
+                                <td>TSO-VOIP@FTR.com</td>
+                                <td>Escalations and order tracking.</td>
+                            </tr>
+                             <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://v.ringcentral.com " target="_blank">https://v.ringcentral.com  </a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Departments & Phone Numbers</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Phone Number</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Frontier Customer Support</strong></td>
+                                <td>800 921 8102</td>
+                                <td>Account/billing, ordering numbers/phones.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontier Tech Support</strong></td>
+                                <td>(833) 767-8862 opt 2</td>
+                                <td>Out of warranty tech support team.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.4 BRIGHTSPEED -->
+        <section id="partner-brightspeed" class="content-section">
+            <h1>3.4 Partner Details: Brightspeed</h1>
+
+            <div class="card">
+                <h2>Links & Resources</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Okta</strong></td>
+                                <td><a href="https://ringcentral.okta.com" target="_blank">https://ringcentral.okta.com</a></td>
+                                <td>Use RC domain credentials.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Portal Site</strong></td>
+                                <td><a href="https://service.risea.ringcentral.com/" target="_blank">service.risea.ringcentral.com</a></td>
+                                <td>Customer portal access.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support Site</strong></td>
+                                <td><a href="https://partnersupport.ringcentral.com/brightspeed.html" target="_blank">Brightspeed Support</a></td>
+                                <td>Official support page.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://v.ringcentral.com" target="_blank">https://v.ringcentral.com</a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.5 COX -->
+        <section id="partner-cox" class="content-section">
+            <h1>3.5 Partner Details: Cox</h1>
+
+            <div class="card">
+                <h2>Links & Resources</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Portal Site</strong></td>
+                                <td><a href="https://service.risea.ringcentral.com/" target="_blank">service.risea.ringcentral.com</a></td>
+                                <td>Cox Business portal access.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support Site</strong></td>
+                                <td><a href="https://partnersupport.ringcentral.com/coxbusiness.html" target="_blank">Cox Support Page</a></td>
+                                <td>Official Cox Business support page.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TCR QA Form</strong></td>
+                                <td><a href="https://docs.google.com/forms/d/e/1FAIpQLScPt4veucMpl3cEriL9dsxpJjn-a_GR_lA2qEhCqz6opwevpQ/viewform" target="_blank">Cox TCR QA Form</a></td>
+                                <td>Customer SMS registration info entry form.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email Distro</strong></td>
+                                <td>Cox.Onboarding@ringcentral.com</td>
+                                <td>Include for team visibility.</td>
+                            </tr>
+                             <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://v.rigncentral.com " target="_blank">https://v.rigncentral.com  </a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Hotlines</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Phone Number</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cox Business Connect Hotline</strong></td>
+                                <td>833-372-6621</td>
+                                <td>Select 1 for Onboarding (1-West, 2-East)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support Hotline</strong></td>
+                                <td>844-303-2928</td>
+                                <td>Technical & Customer Support</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sales Hotline</strong></td>
+                                <td>866-456-9944</td>
+                                <td>Cox Business Sales</td>
+                            </tr>
+                            <tr>
+                                <td><strong>General Hotline</strong></td>
+                                <td>866-446-7777</td>
+                                <td>General Enquiries</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3.6 ZAYO -->
+        <section id="partner-zayo" class="content-section">
+            <h1>3.6 Partner Details: Zayo</h1>
+
+            <div class="card">
+                <h2>Links & Resources</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Link / Address</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Okta</strong></td>
+                                <td><a href="https://ringcentral.okta.com" target="_blank">https://ringcentral.okta.com</a></td>
+                                <td>Use RC domain credentials.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Portal Site</strong></td>
+                                <td><a href="https://service.risea.ringcentral.com/" target="_blank">service.risea.ringcentral.com</a></td>
+                                <td>Zayo customer portal access.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support Site</strong></td>
+                                <td><a href="https://partnersupport.ringcentral.com/" target="_blank">Partner Support Page</a></td>
+                                <td>Official support site.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Orders Distro List</strong></td>
+                                <td>RingCentralOrders@zayo.com</td>
+                                <td>Day-to-day customer communications.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Completions Distro List</strong></td>
+                                <td>RingCentralCompletions@zayo.com</td>
+                                <td>Completion/Thank you emails.</td>
+                            </tr>
+                             <tr>
+                                <td><strong>Meeting Link</strong></td>
+                                <td><a href="https://v.rigncentral.com " target="_blank">https://v.rigncentral.com  </a></td>
+                                <td>Use this link to have your customer join your meeting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function showTab(sectionId, element) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Remove active state from all links
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+
+            // Set active state on target link
+            if (element) {
+                element.classList.add('active');
+            }
+        }
+
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            const chevron = element.querySelector('.chevron');
+            
+            if (submenu.classList.contains('open')) {
+                submenu.classList.remove('open');
+                if (chevron) chevron.classList.remove('rotated');
+            } else {
+                submenu.classList.add('open');
+                if (chevron) chevron.classList.add('rotated');
+            }
+        }
+    </script>
+</body>
+</html>
